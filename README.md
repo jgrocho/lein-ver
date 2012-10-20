@@ -31,6 +31,10 @@ The first time you use `lein-ver` on a project, run
 This will create a file (`src/project_name/version.clj`),
 which takes care of loading `resources/VERSION`
 and exposing its version information to the project.
+Since you probably already have a version specified in `project.clj`,
+this will also use that to write a version to `resources/VERSION`.
+This is the only command that treats `project.clj` as authoritative,
+and should only be run once for each project.
 
 As per the semantic versioning specification,
 `lein-ver` makes use of three numeric components:

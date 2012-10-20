@@ -156,7 +156,9 @@
     (when-not (.exists parent) (.mkdirs parent))
     (when-not (.exists version-file)
       (with-open [wtr (writer version-file)]
-        (.write wtr (version-template project))))))
+        (.write wtr (version-template project)))))
+  (let [project-version (parse-version (:version project))]
+    (write-version-file project project-version)))
 
 (defn write
   "Writes the given version to resources/VERSION and project.clj."
