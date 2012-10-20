@@ -104,6 +104,19 @@ The `lein ver check` command, can be used to verify that
 If they do match, nothing is output and the command returns `0`.
 Otherwise, a message is output on standard error, and it returns `1`.
 
+### In your project
+
+After running `lein ver init`,
+the file `src\project_name\version.clj`
+takes care of loading `resources\VERSION`
+and exposes version information inside your project.
+
+To use, just `use` or `require` the `project-name.version` namespace.
+That namespace defines a map `version` as well as the vars
+`major`, `minor`, `patch`, `pre-release`, and `build`.
+It also defines `string` which returns a string of the version,
+in the same format as given by `lein ver` or found in `project.clj`.
+
 ## License
 
 Copyright © 2012 Jonathan Grochowski
