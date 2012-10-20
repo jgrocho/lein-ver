@@ -83,7 +83,14 @@
 (defn- safe-read-string
   "Reads one object from the string s, when it's not nil."
   [s]
-  (when-not (nil? s) (read-string s)))
+  (when-not (nil? s)
+    (binding [*read-eval* false] (read-string s))))
+
+(defn- read-long
+  "If the string s is an integer, return that integer; nil otherwise."
+  [s]
+  (let [n (safe-read-string s)]
+    (when (= Long (type n)) n)))
 
 (defn- read-nil-string
   "Returns nil when s is \"nil\", s otherwise."
@@ -128,9 +135,9 @@
   [project & args]
   (let [options (apply hash-map args)
         options (into {} (for [[k v] options] [(read-string k) v]))
-        major (safe-read-string (:major options))
-        minor (safe-read-string (:minor options))
-        patch (safe-read-string (:patch options))
+        major (read-long (:major options))
+        minor (read-long (:minor options))
+        patch (read-long (:patch options))
         pre-release (read-nil-string (:pre-release options))
         build (read-nil-string (:build options))
         version {:major major
@@ -145,9 +152,9 @@
   [project & args]
   (let [options (apply hash-map args)
         options (into {} (for [[k v] options] [(read-string k) v]))
-        major (safe-read-string (:major options))
-        minor (safe-read-string (:minor options))
-        patch (safe-read-string (:patch options))
+        major (read-long (:major options))
+        minor (read-long (:minor options))
+        patch (read-long (:patch options))
         pre-release (read-nil-string (:pre-release options))
         build (read-nil-string (:build options))
         version (read-version-file project)

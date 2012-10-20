@@ -48,8 +48,9 @@ For example, to set a version of "1.3.2-rc.2", run
 
     $ lein ver write :major 1 :minor 3 :patch 2 :pre-release rc.2
 
-No validation checks are run against the input,
-so it's possible to specify any data for any component.
+The major, minor, and patch components can only be numeric.
+It is not an error to give non-numeric data,
+but that component will default to nil.
 
 The command `lein ver bump` can be used to increase one of the
 major, minor, or patch components
