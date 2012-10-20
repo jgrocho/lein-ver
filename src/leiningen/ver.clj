@@ -27,19 +27,6 @@
   [name]
   (.replace (munge (str name)) "." File/separator))
 
-(defn init
-  "Initialize the project's version files."
-  [project]
-  (let [project-name (ns-to-path (:name project))
-        version-file (file (first (:source-paths project))
-                           project-name
-                           "version.clj")
-        parent (.getParentFile version-file)]
-    (when-not (.exists parent) (.mkdirs parent))
-    (when-not (.exists version-file)
-      (with-open [wtr (writer version-file)]
-        (.write wtr (version-template project))))))
-
 ; Semver regular expression borrowed from:
 ; https://github.com/mojombo/semver/issues/32#issuecomment-8380547
 ; For sample matches see:
@@ -130,6 +117,47 @@
   (write-version-file project version)
   (replace-project-version version))
 
+(defn- bump-major
+  "Bumps the major component by 1, resetting minor and patch to 0, and
+  pre-release and build to nil."
+  [project]
+  (let [version (read-version-file project)
+        version (assoc version :pre-release nil :build nil)
+        version (assoc version :minor 0 :patch 0)
+        version (update-in version [:major] inc)]
+    (update-versions project version)))
+
+(defn- bump-minor
+  "Bumps the minor component by 1, resetting patch to 0, and pre-release and
+  build to nil."
+  [project]
+  (let [version (read-version-file project)
+        version (assoc version :pre-release nil :build nil)
+        version (assoc version :patch 0)
+        version (update-in version [:minor] inc)]
+    (update-versions project version)))
+
+(defn- bump-patch
+  "Bumps the patch component by 1, resetting pre-release and build to nil."
+  [project]
+  (let [version (read-version-file project)
+        version (assoc version :pre-release nil :build nil)
+        version (update-in version [:patch] inc)]
+    (update-versions project version)))
+
+(defn init
+  "Initialize the project's version files."
+  [project]
+  (let [project-name (ns-to-path (:name project))
+        version-file (file (first (:source-paths project))
+                           project-name
+                           "version.clj")
+        parent (.getParentFile version-file)]
+    (when-not (.exists parent) (.mkdirs parent))
+    (when-not (.exists version-file)
+      (with-open [wtr (writer version-file)]
+        (.write wtr (version-template project))))))
+
 (defn write
   "Writes the given version to resources/VERSION and project.clj."
   [project & args]
@@ -164,34 +192,6 @@
                              :patch patch
                              :pre-release pre-release
                              :build build})]
-    (update-versions project version)))
-
-(defn- bump-major
-  "Bumps the major component by 1, resetting minor and patch to 0, and
-  pre-release and build to nil."
-  [project]
-  (let [version (read-version-file project)
-        version (assoc version :pre-release nil :build nil)
-        version (assoc version :minor 0 :patch 0)
-        version (update-in version [:major] inc)]
-    (update-versions project version)))
-
-(defn- bump-minor
-  "Bumps the minor component by 1, resetting patch to 0, and pre-release and
-  build to nil."
-  [project]
-  (let [version (read-version-file project)
-        version (assoc version :pre-release nil :build nil)
-        version (assoc version :patch 0)
-        version (update-in version [:minor] inc)]
-    (update-versions project version)))
-
-(defn- bump-patch
-  "Bumps the patch component by 1, resetting pre-release and build to nil."
-  [project]
-  (let [version (read-version-file project)
-        version (assoc version :pre-release nil :build nil)
-        version (update-in version [:patch] inc)]
     (update-versions project version)))
 
 (defn bump
