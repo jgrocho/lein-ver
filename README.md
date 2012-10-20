@@ -95,8 +95,8 @@ That is like
 
     X.Y.Z-pre-release+build
 
-where X, Y, Z, pre-release, and build
-are the major, minor, patch, pre-release, and build components, respectively.
+where X, Y, Z, pre-release, and build are the
+major, minor, patch, pre-release, and build components, respectively.
 This is the format that can be found in `project.clj`.
 
 The `lein ver check` command, can be used to verify that
