@@ -10,9 +10,9 @@ It does so in a way that is consistent with
 
 ## Usage
 
-Put `[lein-ver "1.0.0"]`
+Put `[lein-ver "1.0.1"]`
 into the `:plugins` vector of your `:user` profile.
-If you're on Leiningen 1.x do `lein plugin install lein-ver 1.0.0`.
+If you're on Leiningen 1.x do `lein plugin install lein-ver 1.0.1`.
 
 `lein-ver` is used to manage a project's version.
 It stores this information in two places:

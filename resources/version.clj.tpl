@@ -2,9 +2,9 @@
   (:require [clojure.java.io :refer [file reader resource]]
             [clojure.string :refer [join]])
   (:import java.io.PushbackReader))
-(let [@version-file (file (resource "VERSION"))]
+(let [version-file (file (resource "VERSION"))]
   (when (.exists version-file)
-    (with-open [@rdr (reader version-file)]
+    (with-open [rdr (reader version-file)]
       (binding [*read-eval* false]
         (def version (read (PushbackReader. rdr)))
         (def major (:major version))
@@ -14,4 +14,4 @@
         (def build (:build version))
         (def string (str (join "." (filter identity [major minor patch]))
                          (when pre-release (str "-" pre-release))
-                         (when build (str "+" build)))))))))
+                         (when build (str "+" build))))))))
