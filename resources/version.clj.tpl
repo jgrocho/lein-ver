@@ -1,9 +1,9 @@
 (ns {name}.version
-  (:require [clojure.java.io :refer [file reader resource]]
+  (:require [clojure.java.io :refer [reader resource]]
             [clojure.string :refer [join]])
   (:import java.io.PushbackReader))
-(let [version-file (file (resource "VERSION"))]
-  (when (.exists version-file)
+(let [version-file (resource "VERSION")]
+  (when version-file
     (with-open [rdr (reader version-file)]
       (binding [*read-eval* false]
         (def version (read (PushbackReader. rdr)))

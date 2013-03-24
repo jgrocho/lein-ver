@@ -1,4 +1,4 @@
-(defproject lein-ver "1.0.1"
+(defproject lein-ver "1.1.0"
   :description "A lein plugin for handling a project's version"
   :url "https://github.com/jgrocho/lein-ver"
   :license {:name "Eclipse Public License"
