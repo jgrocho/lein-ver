@@ -2,7 +2,8 @@
   (:refer-clojure :exclude [set])
   (:require [clojure.string :refer [join]]
             [clojure.java.io :refer [file reader writer resource]]
-            [leiningen.core.main :refer [abort]])
+            [leiningen.core.main :refer [abort]]
+            [clojure.java.io :as io])
   (:import [java.io File PushbackReader]))
 
 (def ^:private version-file-path
@@ -16,16 +17,16 @@
              "Please create it with 'lein ver write'.")
     (abort)))
 
-(defn- version-template
-  "Return the template file as a string, with variables replaced."
-  [project]
-  (let [template (slurp (resource "version.clj.tpl"))]
-    (.replace template "{name}" (:name project))))
-
 (defn- ns-to-path
   "Return a path from a ns."
   [name]
   (.replace (munge (str name)) "." File/separator))
+
+(defn- version-template
+  "Return the template file as a string, with variables replaced."
+  [project]
+  (let [template (slurp (resource "version.clj.tpl"))]
+    (.replace template "{name}" (get-in project [:lein-ver :project-name] (ns-to-path (:name project))))))
 
 ; Semver regular expression borrowed from:
 ; https://github.com/mojombo/semver/issues/32#issuecomment-8380547
@@ -50,6 +51,7 @@
        (when (:pre-release v) (str "-" (:pre-release v)))
        (when (:build v) (str "+" (:build v)))))
 
+;; Taken from https://gitorious.org/leiningen/leiningen/blobs/raw/9f37f53c5ec4cd7cae453faf4d76edfc07b5b429/src/leiningen/pom.clj
 (defn- read-version-file
   "Returns the version according to the file resources/VERSION or nil if the
   file does not exist."
@@ -59,6 +61,19 @@
       (with-open [rdr (reader version-file)]
         (binding [*read-eval* false]
           (read (PushbackReader. rdr)))))))
+
+(defn- read-git-ref
+  "Reads the commit SHA1 for a git ref path."
+  [git-dir ref-path]
+  (.trim (slurp (str (io/file git-dir ref-path)))))
+
+(defn- read-git-head
+  "Reads the value of HEAD and returns a commit SHA1."
+  [git-dir]
+  (let [head (.trim (slurp (str (io/file git-dir "HEAD"))))]
+    (if-let [ref-path (second (re-find #"ref: (\S+)" head))]
+      (read-git-ref git-dir ref-path)
+      head)))
 
 (defn print-ver
   "Prints the project's current version."
@@ -88,14 +103,15 @@
   "Writes the given version to the file resources/VERSION."
   [project version]
   (let [version-file (file (:root project) version-file-path)
-        parent (.getParentFile version-file)]
+        parent (.getParentFile version-file)
+        git-head (io/file (:root project) ".git")]
     (when-not (.exists parent) (.mkdirs parent))
     (with-open [wtr (writer version-file)]
       (.write wtr "{\n")
       (doseq
-        [k [:major :minor :patch :pre-release :build]]
+        [k [:major :minor :patch :pre-release :build :sha]]
         (.write wtr " ")
-        (.write wtr (prn-str k (k version))))
+        (.write wtr (prn-str k (k (assoc version :sha (read-git-head git-head))))))
       (.write wtr "}\n"))))
 
 (defn- replace-project-version
@@ -148,8 +164,8 @@
 (defn init
   "Initialize the project's version files."
   [project]
-  (let [project-name (ns-to-path (:name project))
-        version-file (file (first (:source-paths project))
+  (let [project-name (get-in project [:lein-ver :project-name] (ns-to-path (:name project)))
+        version-file (file (get-in project [:lein-ver :src-path] (first (:source-paths project)))
                            project-name
                            "version.clj")
         parent (.getParentFile version-file)]
