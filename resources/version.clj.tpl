@@ -12,6 +12,7 @@
         (def patch (:patch version))
         (def pre-release (:pre-release version))
         (def build (:build version))
+        (def sha (:sha version))
         (def string (str (join "." (filter identity [major minor patch]))
                          (when pre-release (str "-" pre-release))
                          (when build (str "+" build))))))))
