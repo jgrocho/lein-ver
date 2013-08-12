@@ -148,8 +148,8 @@
 (defn init
   "Initialize the project's version files."
   [project]
-  (let [project-name (ns-to-path (:name project))
-        version-file (file (first (:source-paths project))
+  (let [project-name (get-in project [:lein-ver :project-name] (ns-to-path (:name project)))
+        version-file (file (get-in project [:lein-ver :src-path] (first (:source-paths project)))
                            project-name
                            "version.clj")
         parent (.getParentFile version-file)]
