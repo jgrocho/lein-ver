@@ -16,16 +16,16 @@
              "Please create it with 'lein ver write'.")
     (abort)))
 
-(defn- version-template
-  "Return the template file as a string, with variables replaced."
-  [project]
-  (let [template (slurp (resource "version.clj.tpl"))]
-    (.replace template "{name}" (:name project))))
-
 (defn- ns-to-path
   "Return a path from a ns."
   [name]
   (.replace (munge (str name)) "." File/separator))
+
+(defn- version-template
+  "Return the template file as a string, with variables replaced."
+  [project]
+  (let [template (slurp (resource "version.clj.tpl"))]
+    (.replace template "{name}" (get-in project [:lein-ver :project-name] (ns-to-path (:name project))))))
 
 ; Semver regular expression borrowed from:
 ; https://github.com/mojombo/semver/issues/32#issuecomment-8380547
